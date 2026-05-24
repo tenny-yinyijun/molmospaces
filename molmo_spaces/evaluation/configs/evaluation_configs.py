@@ -28,6 +28,7 @@ is strictly authoritative for episode initialization.
 from __future__ import annotations
 
 import datetime
+import os
 from pathlib import Path
 
 from molmo_spaces.configs.abstract_exp_config import MlSpacesExpConfig
@@ -193,6 +194,26 @@ class PiPolicyEvalConfig(JsonBenchmarkEvalConfig):
     def model_post_init(self, __context):
         super().model_post_init(__context)
         self.robot_config.action_noise_config.enabled = False
+        # Allow the port to be overridden at run time so multiple jobs can share a
+        # node without stomping on each other (and to dodge stale listeners).
+        env_port = os.environ.get("MOLMOSPACES_PI_PORT")
+        if env_port:
+            self.policy_config.remote_config = {
+                **(self.policy_config.remote_config or {"host": "localhost"}),
+                "port": int(env_port),
+            }
+
+
+class Pi0PolicyEvalConfig(PiPolicyEvalConfig):
+    policy_config: PiPolicyConfig = PiPolicyConfig(
+        remote_config={"host": "localhost", "port": 8090}
+    )
+
+
+class Pi0FASTPolicyEvalConfig(PiPolicyEvalConfig):
+    policy_config: PiPolicyConfig = PiPolicyConfig(
+        remote_config={"host": "localhost", "port": 8100}
+    )
 
 
 class CAPPolicyEvalConfig(JsonBenchmarkEvalConfig):

@@ -40,9 +40,13 @@ rsync-*
 
 checkpoints/
 
+tmp*
+
 typings
+bash_scripts/
 eval_output/
 experiment_output
+slurm_outputs/
 
 
 mlspaces_tests/**/test_output

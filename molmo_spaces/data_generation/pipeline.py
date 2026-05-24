@@ -714,10 +714,14 @@ class ParallelRolloutRunner:
         if viewer is not None:
             viewer.sync()
 
-        try:
-            task.env.current_model.opt.enableflags |= int(mujoco.mjtEnableBit.mjENBL_SLEEP)
-        except AttributeError:
-            print("Not setting mujoco sleep. Needs version >=mujoco-3.8")
+        # mjENBL_SLEEP disabled: it caused periodic (every chunk_size steps)
+        # black frames on the wrist camera during pi0/pi05 rollouts — bodies
+        # the wrist camera depends on were getting skipped on the post-server-
+        # call physics step.
+        # try:
+        #     task.env.current_model.opt.enableflags |= int(mujoco.mjtEnableBit.mjENBL_SLEEP)
+        # except AttributeError:
+        #     print("Not setting mujoco sleep. Needs version >=mujoco-3.8")
 
         step_count = 0
         while not task.is_done():
@@ -761,10 +765,11 @@ class ParallelRolloutRunner:
             if viewer is not None:
                 viewer.sync()
 
-        try:
-            task.env.current_model.opt.enableflags &= ~int(mujoco.mjtEnableBit.mjENBL_SLEEP)
-        except AttributeError:
-            print("Not setting mujoco sleep. Needs version >=mujoco-3.8")
+        # Paired with the disabled enable above — keep commented out.
+        # try:
+        #     task.env.current_model.opt.enableflags &= ~int(mujoco.mjtEnableBit.mjENBL_SLEEP)
+        # except AttributeError:
+        #     print("Not setting mujoco sleep. Needs version >=mujoco-3.8")
 
         # Save profiler summary
         if profiler is not None:

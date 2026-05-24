@@ -216,6 +216,22 @@ class Pi0FASTPolicyEvalConfig(PiPolicyEvalConfig):
     )
 
 
+class PiLocalPolicyEvalConfig(PiPolicyEvalConfig):
+    """In-process pi0/pi05 eval — loads the openpi checkpoint directly, no websocket server.
+
+    PI_Policy._prepare_local_model uses openpi.policies.policy_config.create_trained_policy
+    when remote_config is None, picking the openpi train config from the checkpoint dir
+    basename (e.g. pi05_droid_jointpos, pi0_droid_jointpos).
+    """
+
+    policy_config: PiPolicyConfig = PiPolicyConfig(remote_config=None)
+
+    def model_post_init(self, __context):
+        super().model_post_init(__context)
+        # Parent honors MOLMOSPACES_PI_PORT and re-attaches a remote_config — force off.
+        self.policy_config.remote_config = None
+
+
 class CAPPolicyEvalConfig(JsonBenchmarkEvalConfig):
     robot_config: FrankaCAPRobotConfig = FrankaCAPRobotConfig()
     policy_config: CAPPolicyConfig = CAPPolicyConfig()
